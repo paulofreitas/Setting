@@ -19,11 +19,10 @@ class SettingServiceProvider extends ServiceProvider {
      */
     public function boot()
     {
-        $config = realpath(__DIR__.'/../../config/setting.php');
+        $configPath = __DIR__ . '/../../config/setting.php';
         $this->publishes([
-            $config => config_path('setting.php'),
-        ]);
-        $this->mergeConfigFrom($config, 'philf/setting');
+            $configPath => config_path('setting.php'),
+        ], 'config');
     }
 
     /**
@@ -33,17 +32,20 @@ class SettingServiceProvider extends ServiceProvider {
      */
     public function register()
     {
+        $configPath = __DIR__ . '/../../config/setting.php';
+        $this->mergeConfigFrom($configPath, 'setting');
+
         $this->app['setting'] = $this->app->share(function($app)
         {
-            $path     = $app['config']['philf/setting.path'];
-            $filename = $app['config']['philf/setting.filename'];
+            $path     = $app['config']['setting.path'];
+            $filename = $app['config']['setting.filename'];
 
-            return new Setting($path, $filename, $app['config']['philf/setting.fallback'] ? new LaravelFallbackInterface() : null);
+            return new Setting($path, $filename, $app['config']['setting.fallback'] ? new LaravelFallbackInterface() : null);
         });
 
         $this->app->booting(function($app)
         {
-            if ($app['config']['philf/setting.autoAlias'])
+            if ($app['config']['setting.autoAlias'])
             {
                 $loader = \Illuminate\Foundation\AliasLoader::getInstance();
                 $loader->alias('Setting', 'Philf\Setting\Facades\Setting');
